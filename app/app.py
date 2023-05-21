@@ -9,6 +9,7 @@ Created on Sat May 20 22:14:23 2023
 
 # Import necessary libraries
 from flask import Flask, request, jsonify
+import tensorflow as tf
 import tensorflow_hub as hub
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
