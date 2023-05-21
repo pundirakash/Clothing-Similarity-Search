@@ -19,7 +19,7 @@ import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Load the data
-data = pd.read_csv(os.path.join(current_dir, '../data/amazonFlipkartData.csv'))
+data = pd.read_csv(os.path.join(current_dir, '../data/amazon_flipkart_data.csv'))
 
 # Load the pre-trained Universal Sentence Encoder model
 use_model = hub.load("https://tfhub.dev/google/universal-sentence-encoder-large/5")
@@ -47,10 +47,18 @@ def find_similar_items(input_text, top_n):
     # Get the indices of the top-N most similar items
     top_indices = similarities.argsort()[::-1][:top_n]
 
-    # Retrieve the URLs of the top-N most similar items
-    top_urls = data.iloc[top_indices]['URL'].values.tolist()
+    # Retrieve the descriptions and URLs of the top-N most similar items
+    top_items = []
+    for index in top_indices:
+        description = data.iloc[index]['Description']
+        url = data.iloc[index]['URL']
+        top_items.append({
+            'description': description,
+            'url': url
+        })
 
-    return top_urls
+    return top_items
+
 
 # Define a route to find similar items based on a POST request
 @app.route('/api/find_similar_items', methods=['POST'])
@@ -60,11 +68,11 @@ def find_similar_items_cloud():
     top_n = request.json.get('top_n', 5)  # Default value is 5 if top_n is not specified
 
     # Find the similar items based on the input text and top_n value
-    top_urls = find_similar_items(input_text, top_n)
+    top_items = find_similar_items(input_text, top_n)
 
     # Create a JSON response
     response = {
-        'top_urls': top_urls
+        'results': top_items
     }
 
     # Return the JSON response
